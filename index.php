@@ -5,14 +5,14 @@
 
     include 'includes/db.php';
     include 'includes/Api.php';
-    // global $connect = new mysqli('localhost', 'root', '', 'wstest');
+
+    $absoluteUrl = 'http://'.$_SERVER['SERVER_NAME'].'/WS';
+    echo 'http://'.$_SERVER['SERVER_NAME'];
+    echo "\n";
 
 if ($conn->connect_error) {
     echo $conn->connect_error;
 }
-// echo "Connected to db\n";
-
-// $conn->close();
 
     $db = new Database();
     $api = new Api();
@@ -62,37 +62,55 @@ $api->post("/login", function ($param, $data){
 // Загрузка фоторгафии 
 $api->post("/photo", function ($param, $data){
     global $db;
-    // File name
-    $filename = $_FILES['file']['name']; // -> file obj - name
-    // Valid file extensions
-    $valid_extensions = array("jpg","jpeg","png");
-    // File extension
-    $extension = pathinfo($filename, PATHINFO_EXTENSION); // -> png
-    // Check extension
-    if(in_array(strtolower($extension),$valid_extensions) ) {
-       // Upload file
-       if(move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . $filename )){
-          http_response_code(201);
-          $response = array(
-            "status" => http_response_code(),
-            "name" => $filename
-        );
-       }else{
-          echo 0;
-       }
-    }else{
-       echo 0;
-    }
-    echo json_encode($response);    
+    
+         // File name
+        $filename = $_FILES['file']['name']; // -> file obj - name
+        // Valid file extensions
+        $valid_extensions = array("jpg","jpeg","png");
+        // File extension
+        $extension = pathinfo($filename, PATHINFO_EXTENSION); // -> png
+        echo $extension;
+
+        // Check extension 
+        if(in_array(strtolower($extension),$valid_extensions) ) {
+            // Unical id name photo
+            $fileNameNew = uniqid('').".". $extension;
+            $fileDestination = "photos/" . $fileNameNew;
+            // Upload file
+        if(move_uploaded_file($_FILES['file']['tmp_name'], $fileDestination )){
+            global $absoluteUrl;
+                $sql = "INSERT INTO `photos` (`name`, `url`, `owner_id`, `users`)
+                VALUES ('$fileNameNew', '$absoluteUrl/$fileDestination', '1', '1')";
+                $result = $db->query($sql);
+                echo "\n";
+                echo $result;
+            http_response_code(201);
+            $response = array(
+                "status" => http_response_code(),
+                "name" => $filename,
+                "res" => $result,
+                "id" => $db->insertID()
+            );
+        }else{
+            echo 0;
+        }
+        echo json_encode($response);
+         $result = $db->query($sql);
+         echo json_encode($result);
+    }    
 });
 
 // Получение фоторгафий
 $api->get("/photo", function ($param, $data){
     global $db;
-
+    
     echo "\n";
     echo "Call Photo GET";
-    $sql = "SELECT * FROM `users`";
+    if (count($param) === 0) {
+        $sql = "SELECT * FROM `photos`";
+    }else{
+        $sql = "SELECT * FROM `photos` WHERE `id` = '". $param['id'] ."'"; 
+    }
     echo "\n";
     $result = $db->query($sql);
     $users = array();
@@ -104,6 +122,26 @@ $api->get("/photo", function ($param, $data){
     echo "\n";
 });
 
+$api->get("/user", function ($param, $data){
+    global $db;
+
+    $sql = "SELECT * FROM `users` WHERE `first_name` LIKE '".$param['first_name']."'"; 
+     $result = $db->query($sql);
+     echo json_encode($result);
+});
+
+//Изменение фоторгафии
+// $api->post("/photo", function ($param, $data){
+//     global $db;
+//     if($param['id']){
+//         // var_dump($param);
+//         echo $param['id'];
+//         $sql = "SELECT * FROM `photos` WHERE `name` = 'asdasd'";
+        
+//         $result = $db->query($sql);
+//         echo json_encode($result);
+//     }
+// });
 
 
 
