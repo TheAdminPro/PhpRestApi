@@ -1,60 +1,43 @@
 <?php
-// $conn = new mysqli('localhost', 'root', '', 'wstest');
-// echo count($_GET);
-// echo count($_POST);
-// if(isset($_GET['id'])){
-// 	echo $_SERVER['PATH_INFO'];
-// }
+class Api{
 
-// const url = "http://localhost/WS/index.php";
-// echo "\n";
-// echo url;
-// echo "\n";
-$request = $_SERVER['PATH_INFO']; 
-// echo $request;
-// echo "  ---  ";
-// echo gettype($request);
-// echo "\n";
-// echo "\n";
-// echo "\n";
-
-class Api {
-	// Get
-	function get($action, $call) {
-		if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-			if ($_SERVER['PATH_INFO'] == $action) {
-        		if (is_callable($call)){
-        			call_user_func($call, $_GET, $this->GetContents($_POST));
-        		}
+	// GET
+	function get($path, $callback){
+		if($path == $_SERVER['PATH_INFO'] && $_SERVER['REQUEST_METHOD'] === "GET"){
+			if(is_callable($callback)) {
+				call_user_func($callback, $_GET, $this->GetContents($_POST));
 			}
 		}
-    }
-    // Post
-    function post($action, $call) {
-		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-			if ($_SERVER['PATH_INFO'] == $action) {
-        		if (is_callable($call)){
-        			call_user_func($call, $_GET, $this->GetContents($_POST));
-        		}
+	}
+	// POST
+	function post($path, $callback){
+		if($path == $_SERVER['PATH_INFO'] && $_SERVER['REQUEST_METHOD'] === "POST"){
+			if(is_callable($callback)) {
+				call_user_func($callback, $_GET, $this->GetContents($_POST));
 			}
 		}
-    }
-    // Delete
-    function delete($action, $call) {
-		if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-			if ($_SERVER['PATH_INFO'] == $action) {
-        		if (is_callable($call)){
-        			call_user_func($call, $_GET, $this->GetContents($_POST));
-        		}
+	}
+	// PATCH
+	function patch($path, $callback){
+		if($path == $_SERVER['PATH_INFO'] && $_SERVER['REQUEST_METHOD'] === "PATCH"){
+			if(is_callable($callback)) {
+				call_user_func($callback, $_GET, $this->GetContents($_POST));
 			}
 		}
-    }
+	}
+	// DELETE
+	function delete($path, $callback){
+		if($path == $_SERVER['PATH_INFO'] && $_SERVER['REQUEST_METHOD'] === "DELETE"){
+			if(is_callable($callback)) {
+				call_user_func($callback, $_GET, $this->GetContents($_POST));
+			}
+		}
+	}
 
-    function GetContents($payload){
-        if ($payload == NULL) {
-            $payload = json_decode(file_get_contents("php://input"), true);
-        }
-        return $payload;
-    }
+	function GetContents($payload){
+		if ($payload == NULL) {
+			$payload = json_decode(file_get_contents("php://input"), true);
+		}
+		return $payload;
+	}
 }
-?>
